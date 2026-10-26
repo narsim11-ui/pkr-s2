@@ -7,10 +7,10 @@ cd "$(dirname "$0")/.."
 : "${PKR_PASSWORD:?set PKR_PASSWORD}"
 tmp=$(mktemp -d)
 python3 build/build_page.py "$1" "$2" "$tmp/index.html"
-npx --yes staticrypt@3.5.4 "$tmp/index.html" -p "$PKR_PASSWORD" --short -d "$tmp/out" -c .staticrypt.json --remember 0 \
+npx --yes staticrypt@3.5.4 "$tmp/index.html" -p "$PKR_PASSWORD" --short -d "$tmp/out" -c .staticrypt.json --remember 0 -t build/password_template.html \
   --template-title "Poker Season 02" --template-instructions "Enter the group password." \
   --template-button "Open" --template-placeholder "Password" --template-remember "Remember on this phone" \
-  --template-color-primary "#c96442" --template-color-secondary "#f5f4ef" >/dev/null
+  --template-color-primary "#ff4f8b" --template-color-secondary "#0a0b14" >/dev/null
 cp "$tmp/out/index.html" index.html
 rm -rf "$tmp"
 echo "locked page written to index.html"
