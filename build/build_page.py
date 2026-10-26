@@ -14,11 +14,14 @@ d3 = open(os.path.join(here, 'd3.min.js'), encoding='utf-8').read()
 dates = sorted({r['date'] for r in rows})
 last = datetime.date.fromisoformat(dates[-1]).strftime('%-d %b %Y')
 styles = ''.join(re.findall(r'<style>.*?</style>', page, re.S))
+fonts_css = os.path.join(here, 'fonts.css')
+if os.path.exists(fonts_css):
+    styles = '<style>' + open(fonts_css, encoding='utf-8').read() + '</style>' + styles
 scripts = re.findall(r'<script>(.*?)</script>', page, re.S)
-markup = re.sub(r'<script>.*?</script>|<style>.*?</style>', '', page, flags=re.S)
+markup = re.sub(r'<script>.*?</script>|<style>.*?</style>|<link rel="stylesheet" href="fonts.css">', '', page, flags=re.S)
 
 tokens = """
-:root{--color-fg:#1f1e1d;--color-fg-muted:#73726c;--color-bg:#f5f4ef;--color-panel:#ffffff;--color-border-line:#e6e4dc;
+:root{--color-fg:#1f1e1d;--color-fg-muted:#73726c;--color-bg:#eef0f6;--color-panel:#ffffff;--color-border-line:#e6e4dc;
 --color-ok:#2f7d4f;--color-warn:#a26a12;--color-bad:#bf3b2f;--cds-chart-muted:#d9d6cc;--cds-chart-grid:#efede6;--cds-chart-axis:#bdbab0;
 --cds-chart-reference:#9a978e;--cds-chart-status-critical:#d0543f;--cds-surface-popover:#ffffff;--cds-border:#e6e4dc;
 --cds-shadow-popover:0 4px 14px rgba(0,0,0,.08);--cds-text-secondary:#73726c;
@@ -26,12 +29,12 @@ tokens = """
 --cds-font-size-caption:11.5px;--cds-font-size-body:13px;--cds-font-size-heading:15px;--cds-font-size-title:26px;--cds-font-weight-medium:600;
 --cds-gap-xs:4px;--cds-gap-sm:8px;--cds-gap-md:14px;--cds-gap-lg:22px;--cds-gap-xl:32px;--cds-pad-xs:4px;--cds-pad-sm:8px;--cds-pad-md:12px;
 --cds-pad-lg:18px;--cds-pad-xl:24px;--cds-radius:10px;--cds-dur-slow:.3s;--cds-ease-out:ease-out;color-scheme:light dark}
-@media (prefers-color-scheme:dark){:root{--color-fg:#ecebe6;--color-fg-muted:#a3a29b;--color-bg:#1c1b19;--color-panel:#262522;
+@media (prefers-color-scheme:dark){:root{--color-fg:#ecebe6;--color-fg-muted:#a3a29b;--color-bg:#0a0b14;--color-panel:#262522;
 --color-border-line:#3a3935;--color-ok:#6cc08a;--color-warn:#e0ab4f;--color-bad:#ef7a6c;--cds-chart-muted:#4a4843;--cds-chart-grid:#33322e;
 --cds-chart-axis:#5c5a54;--cds-chart-reference:#85837b;--cds-chart-status-critical:#e2705b;--cds-surface-popover:#2e2d29;--cds-border:#3a3935;
 --cds-shadow-popover:0 4px 14px rgba(0,0,0,.4);--cds-text-secondary:#a3a29b}}
 html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);-webkit-text-size-adjust:100%}
-#dash-root{padding:24px clamp(16px,3vw,40px) 40px;max-width:1280px;margin:0 auto}
+#dash-root{padding:0;max-width:1360px;margin:0 auto}
 .dash-skeleton{background:var(--cds-chart-grid);border-radius:6px;color:transparent}
 .pk-updated{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-top:var(--cds-gap-xs)}
 """
@@ -49,9 +52,7 @@ markup = markup.replace('</header>', updated + '</header>', 1)
 html = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">'
         '<title>Poker Season 02</title>'
-        '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-        '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Serif+4:wght@400&display=swap" rel="stylesheet">'
-        f'<style>{tokens}</style>{styles}<script>{d3}</script><script>{shim}</script></head>'
+                        f'<style>{tokens}</style>{styles}<script>{d3}</script><script>{shim}</script></head>'
         f'<body><div id="dash-root">{markup}</div>' + ''.join(f'<script>{s}</script>' for s in scripts) + '</body></html>')
 open(out_path, 'w', encoding='utf-8').write(html)
 print(f'built {out_path}: {len(rows)} rows, {len(dates)} sessions, through {last}')
